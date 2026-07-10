@@ -1,0 +1,38 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.pyc
+
+# Local databases & storage
+chroma_db/
+uploads/
+logs/
+*.log
+embedding_cache/
+pending_faqs.json
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDEs and editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Production build output
+dist/
+build/
+out/
