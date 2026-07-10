@@ -13,17 +13,32 @@ logger = get_logger(__name__)
 async def lifespan(app: FastAPI):
     """Initialize services on startup."""
     logger.info(f"Starting {APP_NAME}...")
-    # Pre-initialize singletons
-    from embeddings.embedding_service import EmbeddingService
+    
+    # Pre-initialize fast singletons
     from vectorstore.chroma_store import ChromaStore
     from llm.gemini_provider import GeminiProvider
-
-    EmbeddingService.get_instance()
+    
     ChromaStore.get_instance()
     GeminiProvider.get_instance()
-    logger.info(f"{APP_NAME} ready!")
+    
+    # Pre-initialize heavy sentence-transformers model in a background thread
+    # so we don't block Render's port binding check.
+    import threading
+    def load_embeddings_bg():
+        try:
+            from embeddings.embedding_service import EmbeddingService
+            logger.info("Pre-loading Embedding Service in background...")
+            EmbeddingService.get_instance()
+            logger.info("Embedding Service loaded successfully in background.")
+        except Exception as err:
+            logger.error(f"Error loading Embedding Service in background: {err}")
+            
+    threading.Thread(target=load_embeddings_bg, daemon=True).start()
+    
+    logger.info(f"{APP_NAME} startup sequence completed.")
     yield
     logger.info(f"{APP_NAME} shutting down.")
+
 
 
 app = FastAPI(
